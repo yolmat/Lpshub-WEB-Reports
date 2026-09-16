@@ -45,7 +45,6 @@ function Status({ value }) {
 }
 
 export default function ContasReceberPage() {
-  const [dark, setDark] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(true);
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [density, setDensity] = useState("normal");
@@ -88,13 +87,10 @@ export default function ContasReceberPage() {
   }
 
   return (
-    <div className={dark ? "dark" : ""}>
+    <div>
       <div className="min-h-screen bg-surface text-on-surface font-body-md">
 
-        <ReportsHeader
-          dark={dark}
-          setDark={setDark}
-        />
+        <ReportsHeader />
 
         <div className="">
           <main className="relative pt-14 min-h-screen">

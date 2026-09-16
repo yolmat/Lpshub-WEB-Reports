@@ -1,33 +1,95 @@
-/*@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,400,0,0");*/
 @import url("https://fonts.googleapis.com/css2?family=Anton&family=Caveat:wght@600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap");
+
 @import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0");
 
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+
+/* =========================================================
+   DESIGN TOKENS
+   ========================================================= */
 
 @theme {
+
+  /* -------------------------------------------------------
+     PRIMARY
+     ------------------------------------------------------- */
+
   --color-primary: #ba0036;
   --color-primary-container: #e61148;
   --color-on-primary: #ffffff;
-  --color-on-primary-container: #fffbff;
+  --color-on-primary-container: #ffffff;
+
+
+  /* -------------------------------------------------------
+     SECONDARY / TERTIARY
+     ------------------------------------------------------- */
+
+  --color-secondary: #7a1835;
+  --color-secondary-container: #ffd9df;
+  --color-on-secondary: #ffffff;
+  --color-on-secondary-container: #3a0717;
+
   --color-tertiary: #00628d;
-  --color-tertiary-fixed: #c9e6ff;
+  --color-tertiary-container: #c9e6ff;
+  --color-on-tertiary: #ffffff;
+  --color-on-tertiary-container: #001d2d;
+
+
+  /* -------------------------------------------------------
+     SEMANTIC
+     ------------------------------------------------------- */
+
   --color-error: #ba1a1a;
   --color-error-container: #ffdad6;
-  --color-success: #16a34a;
+  --color-on-error: #ffffff;
+  --color-on-error-container: #410002;
+
+  --color-success: #16803c;
   --color-success-container: #dcfce7;
+  --color-on-success: #ffffff;
+  --color-on-success-container: #052e16;
+
+
+  /* -------------------------------------------------------
+     SURFACE
+     ------------------------------------------------------- */
+
   --color-surface: #fcf9f8;
+
   --color-surface-container-lowest: #ffffff;
-  --color-surface-container-low: #f6f3f2;
-  --color-surface-container: #f0eded;
-  --color-surface-container-high: #eae7e7;
-  --color-surface-container-highest: #e5e2e1;
+  --color-surface-container-low: #f8f4f3;
+  --color-surface-container: #f1edec;
+  --color-surface-container-high: #ebe7e6;
+  --color-surface-container-highest: #e4e0df;
+
   --color-on-surface: #1b1b1c;
   --color-on-surface-variant: #5d3f40;
+
+
+  /* -------------------------------------------------------
+     OUTLINE
+     ------------------------------------------------------- */
+
   --color-outline: #916e70;
   --color-outline-variant: #e6bcbe;
 
+
+  /* -------------------------------------------------------
+     TYPOGRAPHY
+     ------------------------------------------------------- */
+
   --font-body: "Inter", sans-serif;
   --font-data: "Inter", sans-serif;
+
+
+  /* -------------------------------------------------------
+     SPACING
+     ------------------------------------------------------- */
 
   --spacing-space-xs: 0.25rem;
   --spacing-space-sm: 0.5rem;
@@ -35,46 +97,194 @@
   --spacing-space-lg: 1rem;
   --spacing-space-xl: 1.5rem;
 
+
+  /* -------------------------------------------------------
+     TYPOGRAPHIC SCALE
+     ------------------------------------------------------- */
+
   --text-headline-lg: 24px;
   --text-headline-lg--line-height: 32px;
+
   --text-headline-sm: 16px;
   --text-headline-sm--line-height: 24px;
+
   --text-label-md: 12px;
   --text-label-md--line-height: 16px;
+
   --text-label-sm: 11px;
   --text-label-sm--line-height: 14px;
+
   --text-body-sm: 12px;
   --text-body-sm--line-height: 16px;
+
   --text-body-md: 13px;
   --text-body-md--line-height: 18px;
+
   --text-caption: 10px;
   --text-caption--line-height: 14px;
+
   --text-data-mono: 13px;
   --text-data-mono--line-height: 18px;
+
+
+  /* -------------------------------------------------------
+     SHADCN / SEMANTIC TOKENS
+     ------------------------------------------------------- */
+
+  --color-background: var(--color-surface);
+  --color-foreground: var(--color-on-surface);
+
+  --color-card: var(--color-surface-container-lowest);
+  --color-card-foreground: var(--color-on-surface);
+
+  --color-popover: var(--color-surface-container-lowest);
+  --color-popover-foreground: var(--color-on-surface);
+
+  --color-primary-foreground: var(--color-on-primary);
+
+  --color-secondary-foreground: var(--color-on-secondary);
+
+  --color-muted: var(--color-surface-container-low);
+  --color-muted-foreground: var(--color-on-surface-variant);
+
+  --color-accent: var(--color-surface-container-high);
+  --color-accent-foreground: var(--color-on-surface);
+
+  --color-destructive: var(--color-error);
+  --color-destructive-foreground: var(--color-on-error);
+
+  --color-border: var(--color-outline-variant);
+  --color-input: var(--color-outline-variant);
+  --color-ring: var(--color-primary);
+
+
+  /* -------------------------------------------------------
+     CHARTS
+     ------------------------------------------------------- */
+
+  --color-chart-1: var(--color-primary);
+  --color-chart-2: var(--color-tertiary);
+  --color-chart-3: #8b3150;
+  --color-chart-4: #d56a82;
+  --color-chart-5: #6d6a69;
+
+
+  /* -------------------------------------------------------
+     SIDEBAR
+     ------------------------------------------------------- */
+
+  --color-sidebar: var(--color-surface-container-low);
+  --color-sidebar-foreground: var(--color-on-surface);
+
+  --color-sidebar-primary: var(--color-primary);
+  --color-sidebar-primary-foreground: var(--color-on-primary);
+
+  --color-sidebar-accent: var(--color-surface-container-high);
+  --color-sidebar-accent-foreground: var(--color-on-surface);
+
+  --color-sidebar-border: var(--color-outline-variant);
+  --color-sidebar-ring: var(--color-primary);
+
+
+  /* -------------------------------------------------------
+     RADIUS
+     ------------------------------------------------------- */
+
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.25rem;
+  --radius-3xl: 1.5rem;
+  --radius-4xl: 2rem;
 }
 
+
+/* =========================================================
+   DARK MODE
+   ========================================================= */
+
 .dark {
+
+  /* -------------------------------------------------------
+     PRIMARY
+     ------------------------------------------------------- */
+
   --color-primary: #ffb2b6;
   --color-primary-container: #a90032;
   --color-on-primary: #40000d;
   --color-on-primary-container: #ffdadb;
+
+
+  /* -------------------------------------------------------
+     SECONDARY / TERTIARY
+     ------------------------------------------------------- */
+
+  --color-secondary: #ffb2c1;
+  --color-secondary-container: #650d29;
+  --color-on-secondary: #470018;
+  --color-on-secondary-container: #ffd9e1;
+
   --color-tertiary: #89ceff;
-  --color-tertiary-fixed: #004c6e;
+  --color-tertiary-container: #004c6e;
+  --color-on-tertiary: #00344c;
+  --color-on-tertiary-container: #c9e6ff;
+
+
+  /* -------------------------------------------------------
+     SEMANTIC
+     ------------------------------------------------------- */
+
   --color-error: #ffb4ab;
   --color-error-container: #93000a;
+  --color-on-error: #690005;
+  --color-on-error-container: #ffdad6;
+
   --color-success: #86efac;
   --color-success-container: #166534;
+  --color-on-success: #052e16;
+  --color-on-success-container: #bbf7d0;
+
+
+  /* -------------------------------------------------------
+     SURFACE
+     ------------------------------------------------------- */
+
   --color-surface: #151313;
-  --color-surface-container-lowest: #1d1a1a;
+
+  --color-surface-container-lowest: #1b1818;
   --color-surface-container-low: #211e1e;
   --color-surface-container: #292525;
   --color-surface-container-high: #332f2f;
-  --color-surface-container-highest: #3a3535;
+  --color-surface-container-highest: #3b3636;
+
   --color-on-surface: #f4eeee;
   --color-on-surface-variant: #d8bfc0;
+
+
+  /* -------------------------------------------------------
+     OUTLINE
+     ------------------------------------------------------- */
+
   --color-outline: #aa898b;
   --color-outline-variant: #604546;
+
+
+  /* -------------------------------------------------------
+     CHARTS
+     ------------------------------------------------------- */
+
+  --color-chart-1: var(--color-primary);
+  --color-chart-2: var(--color-tertiary);
+  --color-chart-3: #e58aa0;
+  --color-chart-4: #a83b5b;
+  --color-chart-5: #9b9291;
 }
+
+
+/* =========================================================
+   GLOBAL BASE
+   ========================================================= */
 
 * {
   box-sizing: border-box;
@@ -87,6 +297,10 @@ body {
   min-height: 100%;
 }
 
+html {
+  font-family: "Inter", sans-serif;
+}
+
 body {
   overscroll-behavior: none;
   background: var(--color-surface);
@@ -94,9 +308,15 @@ body {
   font-family: "Inter", sans-serif;
 }
 
+
+/* =========================================================
+   FORM ELEMENTS
+   ========================================================= */
+
 button,
 input,
-select {
+select,
+textarea {
   font: inherit;
 }
 
@@ -109,23 +329,45 @@ button:disabled {
   opacity: 0.65;
 }
 
+
+/* =========================================================
+   MATERIAL SYMBOLS
+   ========================================================= */
+
 .material-symbols-outlined {
   font-family: "Material Symbols Outlined";
+
   font-weight: normal;
   font-style: normal;
+
   font-size: 24px;
   line-height: 1;
+
   letter-spacing: normal;
   text-transform: none;
+
   display: inline-block;
+
   white-space: nowrap;
   word-wrap: normal;
+
   direction: ltr;
+
   font-feature-settings: "liga";
   -webkit-font-feature-settings: "liga";
   -webkit-font-smoothing: antialiased;
-  font-variation-settings: "opsz" 20, "wght" 400, "FILL" 0, "GRAD" 0;
+
+  font-variation-settings:
+    "opsz" 20,
+    "wght" 400,
+    "FILL" 0,
+    "GRAD" 0;
 }
+
+
+/* =========================================================
+   TYPOGRAPHY UTILITIES
+   ========================================================= */
 
 .font-body-md {
   font-family: Inter, sans-serif;
@@ -176,44 +418,97 @@ button:disabled {
   letter-spacing: -0.01em;
 }
 
+
+/* =========================================================
+   PANELS
+   ========================================================= */
+
 .panel {
   background: var(--color-surface-container-lowest);
+  color: var(--color-on-surface);
+
   border-radius: 0.75rem;
   padding: 1rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+
+  border: 1px solid var(--color-outline-variant);
+
+  box-shadow:
+    0 1px 3px rgba(27, 27, 28, 0.04);
 }
+
+
+/* =========================================================
+   INPUT
+   ========================================================= */
 
 .field-input {
   width: 100%;
   height: 34px;
+
   padding: 0 0.75rem;
-  border: 0;
+
+  border: 1px solid transparent;
   border-radius: 0.5rem;
+
   background: var(--color-surface-container-low);
   color: var(--color-on-surface);
+
   font-size: 12px;
+
   outline: none;
+
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.field-input::placeholder {
+  color: var(--color-on-surface-variant);
+  opacity: 0.75;
 }
 
 .field-input:focus {
   background: var(--color-surface-container-lowest);
-  box-shadow: 0 0 0 1px var(--color-outline-variant);
+
+  border-color: var(--color-outline);
+
+  box-shadow:
+    0 0 0 2px color-mix(in srgb,
+      var(--color-primary) 12%,
+      transparent);
 }
+
+
+/* =========================================================
+   TOOLBAR BUTTON
+   ========================================================= */
 
 .toolbar-button {
   height: 36px;
+
   padding: 0 0.75rem;
+
   border: 0;
   border-radius: 0.5rem;
+
   background: var(--color-surface-container);
   color: var(--color-on-surface);
+
   display: inline-flex;
   align-items: center;
+
   gap: 0.375rem;
+
   font-size: 12px;
   line-height: 16px;
   font-weight: 600;
-  transition: 0.15s ease;
+
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    transform 0.15s ease,
+    opacity 0.15s ease;
 }
 
 .toolbar-button:hover {
@@ -223,16 +518,23 @@ button:disabled {
 .toolbar-button.primary {
   background: var(--color-primary);
   color: var(--color-on-primary);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+
+  box-shadow:
+    0 2px 6px rgba(27, 27, 28, 0.12);
 }
 
 .toolbar-button.primary:hover {
-  opacity: 0.9;
+  background: var(--color-primary-container);
 }
 
 .toolbar-button:active {
   transform: scale(0.98);
 }
+
+
+/* =========================================================
+   ICON / ACTION BUTTONS
+   ========================================================= */
 
 .icon-button,
 .square-button,
@@ -240,17 +542,24 @@ button:disabled {
 .row-action,
 .page-button {
   border: 0;
+
   background: transparent;
   color: var(--color-on-surface-variant);
+
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: 0.15s ease;
+
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    transform 0.15s ease;
 }
 
 .icon-button {
   width: 32px;
   height: 32px;
+
   border-radius: 0.5rem;
 }
 
@@ -265,29 +574,51 @@ button:disabled {
 .square-button {
   width: 28px;
   height: 28px;
+
   border-radius: 0.375rem;
+
   background: var(--color-surface-container);
 }
 
 .small-button {
   min-height: 28px;
+
   padding: 0 0.5rem;
+
   gap: 0.25rem;
+
   border-radius: 0.25rem;
+
   background: var(--color-surface-container);
+
+  color: var(--color-on-surface);
+
   font-size: 11px;
   line-height: 14px;
   font-weight: 600;
 }
 
+
+/* =========================================================
+   DENSITY BUTTON
+   ========================================================= */
+
 .density-button {
   border: 0;
+
   padding: 0.125rem 0.5rem;
+
   border-radius: 0.25rem;
+
   background: transparent;
   color: var(--color-on-surface-variant);
+
   font-size: 11px;
   font-weight: 600;
+
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
 }
 
 .density-button:hover {
@@ -300,17 +631,31 @@ button:disabled {
   color: var(--color-on-primary);
 }
 
+
+/* =========================================================
+   ROW ACTION
+   ========================================================= */
+
 .row-action {
   width: 24px;
   height: 24px;
+
   border-radius: 0.25rem;
 }
+
+
+/* =========================================================
+   PAGINATION
+   ========================================================= */
 
 .page-button {
   min-width: 32px;
   height: 32px;
+
   padding: 0 0.5rem;
+
   border-radius: 0.375rem;
+
   font-size: 11px;
   font-weight: 600;
 }
@@ -320,11 +665,22 @@ button:disabled {
   color: var(--color-on-primary);
 }
 
+
+/* =========================================================
+   SCROLLBAR
+   ========================================================= */
+
 ::-webkit-scrollbar {
   display: none;
 }
 
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
 @media (max-width: 1279px) {
+
   aside {
     display: none;
   }
@@ -335,8 +691,25 @@ button:disabled {
 }
 
 @media (max-width: 767px) {
+
   .px-space-xl {
     padding-left: 0.75rem;
     padding-right: 0.75rem;
+  }
+}
+
+
+/* =========================================================
+   SHADCN BASE
+   ========================================================= */
+
+@layer base {
+
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
   }
 }

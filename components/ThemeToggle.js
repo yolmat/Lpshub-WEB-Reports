@@ -22,8 +22,9 @@ export default function ThemeToggle() {
         <button
             type="button"
             onClick={() => setTheme(isDark ? "light" : "dark")}
+            className="flex text-center"
         >
-            {Icon(theme === "light" ? "light_mode" : "dark_mode", "text-[20px]")}
+            {Icon(theme === "light" ? "light_mode" : "dark_mode", "text-[20px]  text-center")}
         </button>
     );
 }
