@@ -1,16 +1,23 @@
 import Icon from "@/components/icon";
-import FilterFieldBranch from "./filterFieldBranch";
+import FilterFieldBranch from "./filters/filterFieldBranch";
 import { useState } from "react";
 
 export default function SectionFiltersReports() {
+
+    const [branchs, setBranchs] = useState(["Todas"])
 
     const [filtersOpen, setFiltersOpen] = useState(true);
     const [executing, setExecuting] = useState(false);
     const [resetKey, setResetKey] = useState(0)
 
     function executeReport() {
-        setExecuting(true);
-        globalThis.setTimeout(() => setExecuting(false), 600);
+        console.log("Filiais selecionadas:", branchs.join(","))
+
+        setExecuting(true)
+
+        globalThis.setTimeout(() => {
+            setExecuting(false)
+        }, 600)
     }
 
     function clearFilters() {
@@ -39,6 +46,7 @@ export default function SectionFiltersReports() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-space-md">
                     <FilterFieldBranch
                         resetKey={resetKey}
+                        onChange={setBranchs}
                     />
                 </div>
             )}

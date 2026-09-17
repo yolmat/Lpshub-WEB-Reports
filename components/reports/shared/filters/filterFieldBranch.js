@@ -27,7 +27,7 @@ const branchs = [
     "Lita",
 ]
 
-export default function FilterFieldBranch({ resetKey }) {
+export default function FilterFieldBranch({ resetKey, onChange }) {
     const anchor = useComboboxAnchor()
 
     const [value, setValue] = useState(["Todas"])
@@ -39,40 +39,45 @@ export default function FilterFieldBranch({ resetKey }) {
     function handleValueChange(values) {
         const previousValues = value
 
-        // Usuário selecionou "Todas"
+        let newValue
+
         if (
             values.includes("Todas") &&
             !previousValues.includes("Todas")
         ) {
-            setValue(["Todas"])
-            return
+            newValue = ["Todas"]
         }
 
-        if (
+        else if (
             previousValues.includes("Todas") &&
             !values.includes("Todas")
         ) {
-            setValue(values)
-            return
+            newValue = values
         }
 
-        if (
+        else if (
             previousValues.includes("Todas") &&
             values.includes("Todas") &&
             values.length > 1
         ) {
-            setValue(values.filter((item) => item !== "Todas"))
-            return
+            newValue = values.filter(
+                (item) => item !== "Todas"
+            )
         }
 
-        // Nenhuma seleção
-        if (values.length === 0) {
-            setValue(["Todas"])
-            return
+        else if (values.length === 0) {
+            newValue = ["Todas"]
         }
 
-        setValue(values)
+        else {
+            newValue = values
+        }
+
+        setValue(newValue)
+
+        onChange(newValue)
     }
+
 
     return (
         <div className="w-full flex flex-col">
@@ -107,7 +112,7 @@ export default function FilterFieldBranch({ resetKey }) {
                 </ComboboxTrigger>
 
                 <ComboboxContent
-                    className="w-max max-w-[calc(100vw-2rem)]"
+                    className="w-max max-w-[calc(100vw-2rem)] min-w-0 overflow-x-hidden"
                 >
                     <ComboboxInput
                         showTrigger={false}
@@ -119,12 +124,12 @@ export default function FilterFieldBranch({ resetKey }) {
                         Filial Não Encontrada
                     </ComboboxEmpty>
 
-                    <ComboboxList>
+                    <ComboboxList className="w-full max-w-full min-w-0 overflow-x-hidden">
                         {(item) => (
                             <ComboboxItem
                                 key={item}
                                 value={item}
-                                className="w-full"
+                                className="w-full max-w-full min-w-0 whitespace-normal break-all"
                             >
                                 {item}
                             </ComboboxItem>
