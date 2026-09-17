@@ -5,6 +5,8 @@ import ReportsHeader from "@/components/reports/shared/reportsHeader";
 import Icon from "@/components/icon"
 import Metric from "@/components/reports/shared/metric";
 import { useMemo, useState } from "react";
+import SectionHeaderReports from "@/components/reports/shared/sectionHeaderReports";
+import SectionFiltersReports from "@/components/reports/shared/sectionFiltersReports";
 
 const rows = [
   ["100482", "NF-948102", "PetroTech Brasil S.A.", "02/01/2026", "15/01/2026", "Faturamento", "R$ 142.850,00", "R$ 142.850,00", "Vencido", "Carlos Mendes"],
@@ -71,16 +73,6 @@ export default function ContasReceberPage() {
     });
   }, [search, selectedClients]);
 
-  function executeReport() {
-    setExecuting(true);
-    globalThis.setTimeout(() => setExecuting(false), 600);
-  }
-
-  function clearFilters() {
-    setSearch("");
-    setClientSearch("");
-    setSelectedClients(Object.fromEntries(clients.map(([name]) => [name, true])));
-  }
 
   function toggleClient(name) {
     setSelectedClients((current) => ({ ...current, [name]: !current[name] }));
@@ -95,69 +87,18 @@ export default function ContasReceberPage() {
         <div className="">
           <main className="relative pt-14 min-h-screen">
             <div className="px-space-xl py-space-lg flex flex-col gap-space-lg max-w-[1720px] mx-auto w-full">
-              <section className="flex flex-col xl:flex-row xl:items-center justify-between gap-space-md">
-                <div className="flex flex-col gap-space-xs">
 
-                  <div className="flex items-center gap-space-sm flex-wrap">
-                    <h1 className="font-headline-lg font-bold tracking-tight">Contas a Receber — Partidas em Aberto</h1>
-                    <span className="inline-flex items-center gap-1 px-space-xs py-0.5 rounded bg-surface-container-highest text-on-surface-variant font-data-mono font-semibold">
-                      {Icon("terminal", "text-[13px]")} [Transação: ZFI_REC01]
-                    </span>
-                    <span className="inline-flex items-center gap-1 px-space-xs py-0.5 rounded bg-surface-container text-tertiary font-label-sm">ALV Grid v4.8 Active</span>
-                  </div>
+              <SectionHeaderReports
+                title="Contas a Receber — Partidas em Aberto"
+                subtitle="Relatório operacional detalhado de títulos a receber por competência, carteira de clientes, ageing de mora e status de compensação financeira."
+                transaction="ZFI_REC01"
 
-                  <p className="text-on-surface-variant max-w-3xl">
-                    Relatório operacional detalhado de títulos a receber por competência, carteira de clientes, ageing de mora e status de compensação financeira.
-                  </p>
-                </div>
+              />
 
-                <div className="flex items-center gap-space-xs flex-wrap shrink-0">
-                  {[
-                    ["bookmark", "Salvar Variante"],
-                    ["print", "Imprimir / PDF"],
-                    ["table_chart", "Exportar CSV"],
-                  ].map(([ico, label]) => (
-                    <button type="button" key={label} className="toolbar-button">{Icon(ico, "text-[17px]")}<span>{label}</span></button>
-                  ))}
-                  <button type="button" className="toolbar-button primary">{Icon("download", "text-[18px]")}<span>Exportar Excel (XLSX)</span></button>
-                </div>
-              </section>
-
-              <section className="panel flex flex-col gap-space-md">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-space-sm">
-                    <div className="w-7 h-7 rounded bg-surface-container-high flex items-center justify-center text-primary">
-                      {Icon("manage_search", "text-[18px]")}
-                    </div>
-                    <div>
-                      <h2 className="font-headline-sm leading-tight">Critérios de Seleção</h2>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-space-xs">
-                    <button type="button" onClick={() => setFiltersOpen(!filtersOpen)} className="square-button">
-                      {Icon(filtersOpen ? "keyboard_arrow_up" : "keyboard_arrow_down", "text-[18px]")}
-                    </button>
-                  </div>
-                </div>
-
-                {filtersOpen && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-space-md">
-                    <FilterField label="Filial" code="BRANCH" iconName="expand_more">
-                      <SelectField options={["001 — Matriz São Paulo", "002 — CD Betim / MG", "003 — Planta Camaçari / BA", "004 — Terminal Paranaguá / PR"]} />
-                    </FilterField>
-                  </div>
-                )}
-
-                <div className="flex items-center justify-end pt-space-xs">
-                  <div className="flex items-center gap-space-sm">
-                    <button type="button" onClick={clearFilters} className="toolbar-button">{Icon("restart_alt", "text-[16px]")} Limpar Filtros</button>
-                    <button type="button" onClick={executeReport} disabled={executing} className="toolbar-button primary">
-                      {Icon(executing ? "refresh" : "play_arrow", `text-[18px] ${executing ? "animate-spin" : ""}`)}
-                      {executing ? "Executando RFC..." : "Executar Relatório (F8)"}
-                    </button>
-                  </div>
-                </div>
-              </section>
+              <SectionFiltersReports
+                filtersOpen={filtersOpen}
+                setFiltersOpen={setFiltersOpen}
+              />
 
               <section className="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-space-sm flex-1">
@@ -277,24 +218,3 @@ export default function ContasReceberPage() {
   );
 }
 
-function FilterField({ label, code, children }) {
-  return (
-    <div className="flex flex-col gap-1">
-      <label className="font-label-sm text-on-surface-variant flex items-center justify-between">
-        <span>{label}</span><span className="font-caption">{code}</span>
-      </label>
-      {children}
-    </div>
-  );
-}
-
-function SelectField({ options, className = "" }) {
-  return (
-    <div className="relative">
-      <select className={`field-input appearance-none cursor-pointer ${className}`}>
-        {options.map((option) => <option key={option} value={option}>{option}</option>)}
-      </select>
-      {Icon("expand_more", "absolute right-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px] pointer-events-none")}
-    </div>
-  );
-}
