@@ -1,21 +1,33 @@
 "use client"
 
-import { useState, useEffect, useId } from "react"
+import {
+    useEffect,
+    useId,
+    useState,
+} from "react"
 
-import { Button } from "@/components/ui/button"
-import { Calendar } from "@/components/ui/calendar"
-import { Field, FieldLabel } from "@/components/ui/field"
 import {
     format,
     isValid,
     parse,
 } from "date-fns"
+
 import { ptBR } from "date-fns/locale"
+
+import { Button } from "@/components/ui/button"
+import { Calendar } from "@/components/ui/calendar"
+
+import {
+    Field,
+    FieldLabel,
+} from "@/components/ui/field"
+
 import {
     Popover,
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover"
+
 import MatchCode from "@/components/reports/shared/filters/matchCode"
 
 const DATE_PATTERNS = [
@@ -28,16 +40,22 @@ const DATE_PATTERNS = [
 
 function parseDateValue(value) {
     if (value instanceof Date) {
-        return isValid(value) ? value : undefined
+        return isValid(value)
+            ? value
+            : undefined
     }
 
-    const stringValue = String(value ?? "").trim()
+    const stringValue = String(
+        value ?? ""
+    ).trim()
 
     if (!stringValue) {
         return undefined
     }
 
-    for (const pattern of DATE_PATTERNS) {
+    for (
+        const pattern of DATE_PATTERNS
+    ) {
         const parsedDate = parse(
             stringValue,
             pattern,
@@ -53,25 +71,35 @@ function parseDateValue(value) {
 }
 
 function formatDateValue(date) {
-    return format(date, "dd/MM/yyyy")
+    return format(
+        date,
+        "dd/MM/yyyy"
+    )
 }
 
 function normalizeDateText(value) {
-    const parsedDate = parseDateValue(value)
+    const parsedDate =
+        parseDateValue(value)
 
     if (!parsedDate) {
         return ""
     }
 
-    return formatDateValue(parsedDate)
+    return formatDateValue(
+        parsedDate
+    )
 }
 
-function normalizeDefaultDates(defaultValue) {
+function normalizeDefaultDates(
+    defaultValue
+) {
     if (!defaultValue) {
         return []
     }
 
-    const values = Array.isArray(defaultValue)
+    const values = Array.isArray(
+        defaultValue
+    )
         ? defaultValue
         : [defaultValue]
 
@@ -88,63 +116,115 @@ function normalizeDefaultDates(defaultValue) {
         )
     })
 
-    return [...uniqueDates.values()]
+    return [
+        ...uniqueDates.values(),
+    ]
 }
 
-export function FilterFieldDate({ resetKey, defaultValue = undefined, label, onChange, multiple = false, matchCodeOn = false }) {
+function getInitialDates(
+    defaultValue,
+    allowMultiple
+) {
+    const normalizedDates =
+        normalizeDefaultDates(
+            defaultValue
+        )
 
+    return allowMultiple
+        ? normalizedDates
+        : normalizedDates.slice(0, 1)
+}
+
+export function FilterFieldDate({
+    resetKey,
+    defaultValue = undefined,
+    label,
+    onChange,
+    matchCodeOn = false,
+    matchCodeMultiple = false,
+}) {
     const generatedId = useId()
-    const inputId = `date-${generatedId}`
 
-    const [open, setOpen] = useState(false)
-    const [dates, setDates] = useState(() =>
-        normalizeDefaultDates(defaultValue)
-    )
+    const inputId =
+        `date-${generatedId}`
 
-    const formattedDates = dates.map(
-        formatDateValue
-    )
+    const allowMultipleMatchCode =
+        matchCodeOn &&
+        matchCodeMultiple
+
+    const [open, setOpen] =
+        useState(false)
+
+    const [dates, setDates] =
+        useState(() =>
+            getInitialDates(
+                defaultValue,
+                allowMultipleMatchCode
+            )
+        )
+
+    const formattedDates =
+        dates.map(formatDateValue)
 
     useEffect(() => {
         const resetDates =
-            normalizeDefaultDates(defaultValue)
+            getInitialDates(
+                defaultValue,
+                allowMultipleMatchCode
+            )
 
         setDates(resetDates)
         setOpen(false)
-    }, [resetKey, defaultValue])
+    }, [
+        resetKey,
+        defaultValue,
+        allowMultipleMatchCode,
+    ])
 
-    function updateDates(newDates, source) {
-        const normalizedDates = multiple
-            ? newDates
-            : newDates.slice(0, 1)
+    function updateDates(
+        newDates,
+        source
+    ) {
+        const canReceiveMultipleDates =
+            source === "matchcode" &&
+            allowMultipleMatchCode
+
+        const normalizedDates =
+            canReceiveMultipleDates
+                ? newDates
+                : newDates.slice(0, 1)
 
         const formattedValues =
-            normalizedDates.map(formatDateValue)
+            normalizedDates.map(
+                formatDateValue
+            )
 
         setDates(normalizedDates)
 
-        onChange?.(formattedValues, {
-            source,
-        })
+        onChange?.(
+            formattedValues,
+            {
+                source,
+            }
+        )
     }
 
-    function handleSingleDateSelect(selectedDate) {
+    function handleSingleDateSelect(
+        selectedDate
+    ) {
         updateDates(
-            selectedDate ? [selectedDate] : [],
+            selectedDate
+                ? [selectedDate]
+                : [],
             "calendar"
         )
 
         setOpen(false)
     }
 
-    function handleMultipleDatesSelect(selectedDates) {
-        updateDates(
-            selectedDates ?? [],
-            "calendar"
-        )
-    }
-
-    function handleMatchCodeChange(values) {
+    function handleMatchCodeChange(
+        values
+    ) {
         const parsedDates = values
             .map(parseDateValue)
             .filter(Boolean)
@@ -168,7 +248,9 @@ export function FilterFieldDate({ resetKey, defaultValue = undefined, label, onC
                 <div className="min-w-0 flex-1">
                     <Popover
                         open={open}
-                        onOpenChange={setOpen}
+                        onOpenChange={
+                            setOpen
+                        }
                     >
                         <PopoverTrigger
                             render={
@@ -177,18 +259,24 @@ export function FilterFieldDate({ resetKey, defaultValue = undefined, label, onC
                                     variant="outline"
                                     id={inputId}
                                     className={`
-                                    h-9
-                                    w-full
-                                    min-w-0
-                                    justify-start
-                                    overflow-hidden
-                                    ${matchCodeOn ? "rounded-r-none" : ""}
-                                    !text-sm
-                                `}
+                                        h-9
+                                        w-full
+                                        min-w-0
+                                        justify-start
+                                        overflow-hidden
+                                        !text-sm
+                                        ${matchCodeOn
+                                            ? "rounded-r-none"
+                                            : ""
+                                        }
+                                    `}
                                 >
                                     <span className="block min-w-0 flex-1 truncate text-left">
-                                        {formattedDates.length > 0
-                                            ? formattedDates.join(", ")
+                                        {formattedDates.length >
+                                            0
+                                            ? formattedDates.join(
+                                                ", "
+                                            )
                                             : "Selecione uma data"}
                                     </span>
                                 </Button>
@@ -199,65 +287,65 @@ export function FilterFieldDate({ resetKey, defaultValue = undefined, label, onC
                             className="w-auto overflow-hidden p-0"
                             align="start"
                         >
-                            {multiple ? (
-                                <Calendar
-                                    locale={ptBR}
-                                    mode="multiple"
-                                    selected={dates}
-                                    defaultMonth={dates[0]}
-                                    captionLayout="dropdown"
-                                    onSelect={
-                                        handleMultipleDatesSelect
-                                    }
-                                />
-                            ) : (
-                                <Calendar
-                                    locale={ptBR}
-                                    mode="single"
-                                    selected={dates[0]}
-                                    defaultMonth={dates[0]}
-                                    captionLayout="dropdown"
-                                    onSelect={
-                                        handleSingleDateSelect
-                                    }
-                                />
-                            )}
+                            <Calendar
+                                locale={
+                                    ptBR
+                                }
+                                mode="single"
+                                selected={
+                                    dates[0]
+                                }
+                                defaultMonth={
+                                    dates[0]
+                                }
+                                captionLayout="dropdown"
+                                onSelect={
+                                    handleSingleDateSelect
+                                }
+                            />
                         </PopoverContent>
                     </Popover>
                 </div>
 
                 {matchCodeOn && (
-
                     <MatchCode
-                        value={formattedDates}
-                        onChange={handleMatchCodeChange}
-                        transformValue={normalizeDateText}
-                        maxValues={
-                            multiple ? undefined : 1
+                        value={
+                            formattedDates
                         }
-                        title={`MatchCode — ${label}`}
+                        onChange={
+                            handleMatchCodeChange
+                        }
+                        transformValue={
+                            normalizeDateText
+                        }
+                        maxValues={
+                            matchCodeMultiple
+                                ? undefined
+                                : 1
+                        }
+                        title={
+                            `MatchCode — ${label}`
+                        }
                         description={
-                            multiple
+                            matchCodeMultiple
                                 ? "Cole uma ou várias datas copiadas do Excel."
                                 : "Cole uma data copiada do Excel."
                         }
                         placeholder={
-                            multiple
+                            matchCodeMultiple
                                 ? "21/09/2026\n22/09/2026\n23/09/2026"
                                 : "21/09/2026"
                         }
                         buttonClassName="
-                    h-9
-                    w-9
-                    shrink-0
-                    rounded-l-none
-                    border-l-0
-                    p-0
-                "
+                            h-9
+                            w-9
+                            shrink-0
+                            rounded-l-none
+                            border-l-0
+                            p-0
+                        "
                     />
-
                 )}
-
             </div>
         </Field>
     )

@@ -379,8 +379,8 @@ export default function SectionFiltersReports({ onDataChange, onLoadingChange, }
                     />
 
                     <FilterFieldDate
-                        multiple
                         matchCodeOn
+                        matchCodeMultiple
                         label="Data Inicio | documento"
                         resetKey={resetKey}
                         onChange={handleDateInitChange}
