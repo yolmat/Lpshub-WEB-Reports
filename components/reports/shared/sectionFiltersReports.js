@@ -84,14 +84,13 @@ function getErrorMessage(
     return fallbackMessage
 }
 
-export default function SectionFiltersReports() {
+export default function SectionFiltersReports({ onDataChange, onLoadingChange, }) {
 
     const [branchs, setBranchs] = useState(["Todas"])
     const [dateInit, setDateInit] = useState([])
     const [dateEnd, setDateEnd] = useState([])
     const [dateInitFromMatchCode, setDateInitFromMatchCode] = useState(false)
 
-    const [reportData, setReportData] = useState(null)
     const [requestError, setRequestError] = useState("")
 
     const [filtersOpen, setFiltersOpen] = useState(true);
@@ -99,26 +98,17 @@ export default function SectionFiltersReports() {
     const [resetKey, setResetKey] = useState(0)
 
     async function executeReport() {
-
-        const filtros = [
-            branchs,
-            dateInitFromMatchCode,
-            dateInit,
-            dateEnd
-        ]
-
-        console.log(filtros)
-
         if (executing) {
             return
         }
 
         setExecuting(true)
+        onLoadingChange?.(true)
         setRequestError("")
 
         try {
             const empresa = branchs.includes("Todas")
-                ? ALL_COMPANIES
+                ? allCompanies
                 : branchs.map((branch) =>
                     branch.toLocaleUpperCase("pt-BR")
                 )
@@ -178,6 +168,15 @@ export default function SectionFiltersReports() {
                 requestBody
             )
 
+            /*
+             * Não utilize:
+             *
+             * onDataChange(requestBody)
+             *
+             * O requestBody são os filtros, não os
+             * registros da tabela.
+             */
+
             const response = await fetch(
                 "/api/extratosBancarios",
                 {
@@ -188,19 +187,26 @@ export default function SectionFiltersReports() {
                             "application/json",
                     },
 
-                    body: JSON.stringify(requestBody),
+                    body: JSON.stringify(
+                        requestBody
+                    ),
                 }
             )
 
             const contentType =
-                response.headers.get("content-type") ?? ""
+                response.headers.get(
+                    "content-type"
+                ) ?? ""
 
-            const responseText = await response.text()
+            const responseText =
+                await response.text()
 
             let responseData = null
 
             if (
-                contentType.includes("application/json") &&
+                contentType.includes(
+                    "application/json"
+                ) &&
                 responseText
             ) {
                 try {
@@ -214,15 +220,17 @@ export default function SectionFiltersReports() {
             }
 
             if (!response.ok) {
-                const responsePreview = responseText
-                    .replace(/\s+/g, " ")
-                    .slice(0, 200)
+                const responsePreview =
+                    responseText
+                        .replace(/\s+/g, " ")
+                        .slice(0, 200)
 
                 console.error(
                     "Resposta completa da API:",
                     {
                         status: response.status,
-                        statusText: response.statusText,
+                        statusText:
+                            response.statusText,
                         contentType,
                         responseData,
                         responsePreview,
@@ -242,19 +250,46 @@ export default function SectionFiltersReports() {
             }
 
             if (
-                !contentType.includes("application/json")
+                !contentType.includes(
+                    "application/json"
+                )
             ) {
                 throw new Error(
-                    `A API respondeu com um formato inesperado: ${contentType || "sem content-type"
+                    `A API respondeu com um formato inesperado: ${contentType ||
+                    "sem content-type"
                     }.`
                 )
             }
 
-            setReportData(responseData)
+            /*
+             * Aceita tanto o novo retorno direto:
+             *
+             * [...]
+             *
+             * quanto o formato antigo:
+             *
+             * { success: true, data: [...] }
+             */
+            const records = Array.isArray(
+                responseData
+            )
+                ? responseData
+                : responseData?.data
+
+            if (!Array.isArray(records)) {
+                throw new Error(
+                    "A rota extratosBancarios não retornou um array de registros."
+                )
+            }
+
+            /*
+             * Aqui os registros são enviados ao page.
+             */
+            onDataChange?.(records)
 
             console.log(
-                "Dados recebidos:",
-                responseData
+                "Registros enviados para tabela:",
+                records.length
             )
         } catch (error) {
             console.error(
@@ -262,7 +297,7 @@ export default function SectionFiltersReports() {
                 error
             )
 
-            setReportData(null)
+            onDataChange?.(null)
 
             setRequestError(
                 error instanceof Error
@@ -271,6 +306,7 @@ export default function SectionFiltersReports() {
             )
         } finally {
             setExecuting(false)
+            onLoadingChange?.(false)
         }
     }
 
@@ -298,9 +334,13 @@ export default function SectionFiltersReports() {
         setDateInit([])
         setDateEnd([])
         setDateInitFromMatchCode(false)
+        setRequestError("")
+
+        onDataChange?.(null)
 
         setResetKey(
-            (currentValue) => currentValue + 1
+            (currentValue) =>
+                currentValue + 1
         )
     }
 
@@ -321,6 +361,15 @@ export default function SectionFiltersReports() {
                     </button>
                 </div>
             </div>
+
+            {requestError ? (
+                <p
+                    role="alert"
+                    className="text-sm text-destructive"
+                >
+                    {requestError}
+                </p>
+            ) : null}
 
             {filtersOpen && (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-space-sm">
