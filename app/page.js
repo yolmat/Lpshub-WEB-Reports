@@ -1,82 +1,199 @@
-"use client";
+"use client"
 
-// Components
-import ReportsHeader from "@/components/reports/shared/reportsHeader";
-import Icon from "@/components/icon"
-import Metric from "@/components/reports/shared/metric";
-import { useState } from "react"
-import SectionHeaderReports from "@/components/reports/shared/sectionHeaderReports";
-import SectionFiltersReports from "@/components/reports/shared/sectionFiltersReports";
+import {
+  useRef,
+  useState,
+} from "react"
+
+import ReportsHeader from "@/components/reports/shared/reportsHeader"
+
+import Metric from "@/components/reports/shared/metric"
+
+import SectionHeaderReports from "@/components/reports/shared/sectionHeaderReports"
+
+import SectionFiltersReports from "@/components/reports/shared/sectionFiltersReports"
+
 import ReportDataTable from "@/components/reports/shared/reportDataTable"
+
 import { bankStatementColumns } from "@/components/reports/bankStatement/bankStatementColumns"
 
 export default function ContasReceberPage() {
-  const [reportData, setReportData] = useState(null)
-  const [reportLoading, setReportLoading] = useState(false)
+  const reportTableRef =
+    useRef(null)
 
+  const [reportData, setReportData] =
+    useState(null)
+
+  const [
+    reportLoading,
+    setReportLoading,
+  ] = useState(false)
+
+  const [
+    exportingExcel,
+    setExportingExcel,
+  ] = useState(false)
+
+  const [
+    exportError,
+    setExportError,
+  ] = useState("")
+
+  const canExport =
+    Array.isArray(reportData) &&
+    reportData.length > 0 &&
+    !reportLoading
+
+  async function handleExportExcel() {
+    if (
+      !canExport ||
+      exportingExcel
+    ) {
+      return
+    }
+
+    const exportFunction =
+      reportTableRef.current
+        ?.exportToExcel
+
+    if (!exportFunction) {
+      setExportError(
+        "A tabela ainda não está pronta para exportação."
+      )
+
+      return
+    }
+
+    setExportingExcel(true)
+    setExportError("")
+
+    try {
+      await exportFunction()
+    } catch (error) {
+      console.error(
+        "Erro ao exportar relatório:",
+        error
+      )
+
+      setExportError(
+        error instanceof Error
+          ? error.message
+          : "Não foi possível gerar o arquivo Excel."
+      )
+    } finally {
+      setExportingExcel(false)
+    }
+  }
+
+  function handleDataChange(
+    newReportData
+  ) {
+    setReportData(newReportData)
+    setExportError("")
+  }
 
   return (
-    <div>
-      <div className="min-h-screen bg-surface text-on-surface font-body-md">
+    <div className="min-h-screen bg-surface font-body-md text-on-surface">
+      <ReportsHeader />
 
-        <ReportsHeader />
+      <main className="relative min-h-screen pt-14">
+        <div className="mx-auto flex w-full max-w-[1720px] flex-col gap-space-lg px-space-xl py-space-lg">
+          <SectionHeaderReports
+            title="Contas a Receber — Partidas em Aberto"
+            subtitle="Relatório operacional detalhado de títulos a receber por competência, carteira de clientes, ageing de mora e status de compensação financeira."
+            transaction="ZFI_REC01"
+            onExport={
+              handleExportExcel
+            }
+            exportingExcel={
+              exportingExcel
+            }
+            exportDisabled={
+              !canExport
+            }
+            exportError={
+              exportError
+            }
+          />
 
-        <div className="">
-          <main className="relative pt-14 min-h-screen">
-            <div className="px-space-xl py-space-lg flex flex-col gap-space-lg max-w-[1720px] mx-auto w-full">
+          <SectionFiltersReports
+            onDataChange={
+              handleDataChange
+            }
+            onLoadingChange={
+              setReportLoading
+            }
+          />
 
-              <SectionHeaderReports
-                title="Contas a Receber — Partidas em Aberto"
-                subtitle="Relatório operacional detalhado de títulos a receber por competência, carteira de clientes, ageing de mora e status de compensação financeira."
-                transaction="ZFI_REC01"
-
+          <section className="flex flex-col justify-between gap-space-md lg:flex-row lg:items-center">
+            <div className="grid flex-1 grid-cols-2 gap-space-sm sm:grid-cols-4">
+              <Metric
+                label="Total Geral"
+                value="R$ 4.892.430,00"
               />
 
-              <SectionFiltersReports
-                onDataChange={setReportData}
-                onLoadingChange={setReportLoading}
+              <Metric
+                label="Em Aberto"
+                value="R$ 2.410.150,00"
+                tone="tertiary"
+                dot
               />
 
-              <section className="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-space-sm flex-1">
-                  <Metric label="Total Geral" value="R$ 4.892.430,00" />
-                  <Metric label="Em Aberto" value="R$ 2.410.150,00" tone="tertiary" dot />
-                  <Metric label="Vencido" value="R$ 684.200,00" tone="error" dot />
-                  <Metric label="Pago" value="R$ 1.798.080,00" tone="success" dot />
-                </div>
+              <Metric
+                label="Vencido"
+                value="R$ 684.200,00"
+                tone="error"
+                dot
+              />
 
-              </section>
-
-              <span className="font-label-sm text-on-surface-variant">
-                Registros recebidos:{" "}
-                <strong className="text-on-surface">
-                  {reportData?.length ?? 0}
-                </strong>
-              </span>
-
-              <ReportDataTable
-                data={reportData}
-                columns={bankStatementColumns}
-                loading={reportLoading}
-                searchPlaceholder="Pesquisar no extrato bancário..."
-                initialTitle="Execute o relatório bancário"
-                initialDescription="Informe as empresas e as datas para consultar os lançamentos bancários."
-                emptyTitle="Nenhum lançamento encontrado"
-                emptyDescription="Não foram encontrados lançamentos bancários para os filtros informados."
-                getRowId={(row, index) =>
-                  [
-                    row.AccountCode,
-                    row.Sequence,
-                    row.StatementNumber,
-                    index,
-                  ].join("-")
-                }
+              <Metric
+                label="Pago"
+                value="R$ 1.798.080,00"
+                tone="success"
+                dot
               />
             </div>
-          </main>
-        </div>
-      </div>
-    </div>
-  );
-}
+          </section>
 
+          <span className="font-label-sm text-on-surface-variant">
+            Registros recebidos:{" "}
+
+            <strong className="text-on-surface">
+              {reportData?.length ??
+                0}
+            </strong>
+          </span>
+
+          <ReportDataTable
+            ref={reportTableRef}
+            data={reportData}
+            columns={
+              bankStatementColumns
+            }
+            loading={
+              reportLoading
+            }
+            exportFileName="extratosBancarios"
+            exportSheetName="Extratos bancários"
+            searchPlaceholder="Pesquisar no extrato bancário..."
+            initialTitle="Execute o relatório bancário"
+            initialDescription="Informe as empresas e as datas para consultar os lançamentos bancários."
+            emptyTitle="Nenhum lançamento encontrado"
+            emptyDescription="Não foram encontrados lançamentos bancários para os filtros informados."
+            getRowId={(
+              row,
+              index
+            ) =>
+              [
+                row.AccountCode,
+                row.Sequence,
+                row.StatementNumber,
+                index,
+              ].join("-")
+            }
+          />
+        </div>
+      </main>
+    </div>
+  )
+}
