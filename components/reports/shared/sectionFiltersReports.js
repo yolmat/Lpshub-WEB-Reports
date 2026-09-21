@@ -1,6 +1,7 @@
 import Icon from "@/components/icon";
 import FilterFieldBranch from "./filters/filterFieldBranch";
 import { useState } from "react";
+import { FilterFieldDate } from "./filters/filterFieldDate";
 
 export default function SectionFiltersReports() {
 
@@ -43,11 +44,22 @@ export default function SectionFiltersReports() {
             </div>
 
             {filtersOpen && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-space-md">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-space-sm">
                     <FilterFieldBranch
                         resetKey={resetKey}
                         onChange={setBranchs}
                     />
+
+                    <FilterFieldDate
+                        label="Data Inicio | documento"
+                        resetKey={resetKey}
+                    />
+
+                    <FilterFieldDate
+                        label="Data Fim | documento"
+                        resetKey={resetKey}
+                    />
+
                 </div>
             )}
 

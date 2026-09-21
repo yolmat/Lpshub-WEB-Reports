@@ -15,6 +15,7 @@ import {
     ComboboxInput,
     ComboboxTrigger
 } from "@/components/ui/combobox"
+import { Field, FieldLabel } from "@/components/ui/field"
 
 const branchs = [
     "Todas",
@@ -80,8 +81,8 @@ export default function FilterFieldBranch({ resetKey, onChange }) {
 
 
     return (
-        <div className="w-full flex flex-col">
-            <label className="font-bold">Filial</label>
+        <Field className="w-full flex flex-col">
+            <FieldLabel className="font-bold">Filial</FieldLabel>
             <Combobox
                 multiple
                 autoHighlight
@@ -90,7 +91,7 @@ export default function FilterFieldBranch({ resetKey, onChange }) {
                 onValueChange={handleValueChange}
                 itemToStringValue={(branchs) => branchs}
             >
-                <ComboboxTrigger className="h-auto min-h-9 w-full max-w-xs">
+                <ComboboxTrigger className="h-auto min-h-9 w-full">
                     <ComboboxChips
                         ref={anchor}
                         className="w-full flex-wrap gap-1 overflow-hidden"
@@ -137,6 +138,6 @@ export default function FilterFieldBranch({ resetKey, onChange }) {
                     </ComboboxList>
                 </ComboboxContent>
             </Combobox>
-        </ div>
+        </ Field>
     )
 }
