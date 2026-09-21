@@ -3,6 +3,87 @@ import FilterFieldBranch from "./filters/filterFieldBranch";
 import { useState } from "react";
 import { FilterFieldDate } from "./filters/filterFieldDate";
 
+const ALL_COMPANIES = [
+    "LPSI",
+    "LSUL",
+    "EBC",
+]
+
+function convertDateToApi(date) {
+    if (!date) {
+        return ""
+    }
+
+    // A data já está em yyyy-MM-dd
+    if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+        return date
+    }
+
+    const match = String(date).match(
+        /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/
+    )
+
+    if (!match) {
+        throw new Error(
+            `Formato de data inválido: ${date}`
+        )
+    }
+
+    const [, day, month, year] = match
+
+    return [
+        year,
+        month.padStart(2, "0"),
+        day.padStart(2, "0"),
+    ].join("-")
+}
+
+function getErrorMessage(
+    responseData,
+    fallbackMessage
+) {
+    const possibleMessages = [
+        responseData?.error?.message?.value,
+        responseData?.error?.message,
+        responseData?.message?.value,
+        responseData?.message,
+        responseData?.error?.value,
+        responseData?.error,
+        responseData?.details,
+        responseData?.detail,
+    ]
+
+    for (const possibleMessage of possibleMessages) {
+        if (
+            typeof possibleMessage === "string" &&
+            possibleMessage.trim()
+        ) {
+            return possibleMessage
+        }
+
+        if (
+            typeof possibleMessage === "number"
+        ) {
+            return String(possibleMessage)
+        }
+
+        if (
+            possibleMessage &&
+            typeof possibleMessage === "object"
+        ) {
+            try {
+                return JSON.stringify(
+                    possibleMessage
+                )
+            } catch {
+                continue
+            }
+        }
+    }
+
+    return fallbackMessage
+}
+
 export default function SectionFiltersReports() {
 
     const [branchs, setBranchs] = useState(["Todas"])
@@ -10,27 +91,187 @@ export default function SectionFiltersReports() {
     const [dateEnd, setDateEnd] = useState([])
     const [dateInitFromMatchCode, setDateInitFromMatchCode] = useState(false)
 
+    const [reportData, setReportData] = useState(null)
+    const [requestError, setRequestError] = useState("")
 
     const [filtersOpen, setFiltersOpen] = useState(true);
     const [executing, setExecuting] = useState(false);
     const [resetKey, setResetKey] = useState(0)
 
-    function executeReport() {
-        const filters = {
+    async function executeReport() {
+
+        const filtros = [
             branchs,
+            dateInitFromMatchCode,
             dateInit,
-            dateEnd: dateInitFromMatchCode
-                ? []
-                : dateEnd,
+            dateEnd
+        ]
+
+        console.log(filtros)
+
+        if (executing) {
+            return
         }
 
-        console.log("Filtros:", filters)
-
         setExecuting(true)
+        setRequestError("")
 
-        globalThis.setTimeout(() => {
+        try {
+            const empresa = branchs.includes("Todas")
+                ? ALL_COMPANIES
+                : branchs.map((branch) =>
+                    branch.toLocaleUpperCase("pt-BR")
+                )
+
+            let requestBody
+
+            if (dateInitFromMatchCode) {
+                const datas = dateInit
+                    .map(convertDateToApi)
+                    .sort()
+
+                if (datas.length === 0) {
+                    throw new Error(
+                        "Informe pelo menos uma data no MatchCode."
+                    )
+                }
+
+                requestBody = {
+                    empresa,
+                    datas,
+                }
+            } else {
+                if (dateInit.length === 0) {
+                    throw new Error(
+                        "Informe a data inicial."
+                    )
+                }
+
+                if (dateEnd.length === 0) {
+                    throw new Error(
+                        "Informe a data final."
+                    )
+                }
+
+                const dataInicial =
+                    convertDateToApi(dateInit[0])
+
+                const dataFinal =
+                    convertDateToApi(dateEnd[0])
+
+                if (dataInicial > dataFinal) {
+                    throw new Error(
+                        "A data inicial não pode ser maior que a data final."
+                    )
+                }
+
+                requestBody = {
+                    empresa,
+                    datas: [],
+                    dataInicial,
+                    dataFinal,
+                }
+            }
+
+            console.log(
+                "Body enviado para API:",
+                requestBody
+            )
+
+            const response = await fetch(
+                "/api/extratosBancarios",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json",
+                    },
+
+                    body: JSON.stringify(requestBody),
+                }
+            )
+
+            const contentType =
+                response.headers.get("content-type") ?? ""
+
+            const responseText = await response.text()
+
+            let responseData = null
+
+            if (
+                contentType.includes("application/json") &&
+                responseText
+            ) {
+                try {
+                    responseData =
+                        JSON.parse(responseText)
+                } catch {
+                    throw new Error(
+                        "A resposta foi identificada como JSON, mas possui conteúdo inválido."
+                    )
+                }
+            }
+
+            if (!response.ok) {
+                const responsePreview = responseText
+                    .replace(/\s+/g, " ")
+                    .slice(0, 200)
+
+                console.error(
+                    "Resposta completa da API:",
+                    {
+                        status: response.status,
+                        statusText: response.statusText,
+                        contentType,
+                        responseData,
+                        responsePreview,
+                    }
+                )
+
+                const fallbackMessage =
+                    `Erro ${response.status} ao acessar a API. ` +
+                    `Resposta: ${responsePreview}`
+
+                throw new Error(
+                    getErrorMessage(
+                        responseData,
+                        fallbackMessage
+                    )
+                )
+            }
+
+            if (
+                !contentType.includes("application/json")
+            ) {
+                throw new Error(
+                    `A API respondeu com um formato inesperado: ${contentType || "sem content-type"
+                    }.`
+                )
+            }
+
+            setReportData(responseData)
+
+            console.log(
+                "Dados recebidos:",
+                responseData
+            )
+        } catch (error) {
+            console.error(
+                "Erro ao executar relatório:",
+                error
+            )
+
+            setReportData(null)
+
+            setRequestError(
+                error instanceof Error
+                    ? error.message
+                    : "Não foi possível executar o relatório."
+            )
+        } finally {
             setExecuting(false)
-        }, 600)
+        }
     }
 
     function handleDateInitChange(
