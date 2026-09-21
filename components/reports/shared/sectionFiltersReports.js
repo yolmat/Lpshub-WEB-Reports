@@ -6,13 +6,25 @@ import { FilterFieldDate } from "./filters/filterFieldDate";
 export default function SectionFiltersReports() {
 
     const [branchs, setBranchs] = useState(["Todas"])
+    const [dateInit, setDateInit] = useState([])
+    const [dateEnd, setDateEnd] = useState([])
+    const [dateInitFromMatchCode, setDateInitFromMatchCode] = useState(false)
+
 
     const [filtersOpen, setFiltersOpen] = useState(true);
     const [executing, setExecuting] = useState(false);
     const [resetKey, setResetKey] = useState(0)
 
     function executeReport() {
-        console.log("Filiais selecionadas:", branchs.join(","))
+        const filters = {
+            branchs,
+            dateInit,
+            dateEnd: dateInitFromMatchCode
+                ? []
+                : dateEnd,
+        }
+
+        console.log("Filtros:", filters)
 
         setExecuting(true)
 
@@ -21,8 +33,34 @@ export default function SectionFiltersReports() {
         }, 600)
     }
 
+    function handleDateInitChange(
+        values,
+        metadata = {}
+    ) {
+        setDateInit(values)
+
+        const hasMatchCodeValues =
+            metadata.source === "matchcode" &&
+            values.length > 0
+
+        setDateInitFromMatchCode(
+            hasMatchCodeValues
+        )
+
+        if (hasMatchCodeValues) {
+            setDateEnd([])
+        }
+    }
+
     function clearFilters() {
-        setResetKey((value) => value + 1)
+        setBranchs(["Todas"])
+        setDateInit([])
+        setDateEnd([])
+        setDateInitFromMatchCode(false)
+
+        setResetKey(
+            (currentValue) => currentValue + 1
+        )
     }
 
     return (
@@ -51,14 +89,20 @@ export default function SectionFiltersReports() {
                     />
 
                     <FilterFieldDate
+                        multiple
+                        matchCodeOn
                         label="Data Inicio | documento"
                         resetKey={resetKey}
+                        onChange={handleDateInitChange}
                     />
 
-                    <FilterFieldDate
-                        label="Data Fim | documento"
-                        resetKey={resetKey}
-                    />
+                    {!dateInitFromMatchCode && (
+                        <FilterFieldDate
+                            label="Data Fim | documento"
+                            resetKey={resetKey}
+                            onChange={setDateEnd}
+                        />
+                    )}
 
                 </div>
             )}
