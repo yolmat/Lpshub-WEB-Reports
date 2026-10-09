@@ -1,10 +1,9 @@
+
 import { NextResponse } from "next/server"
+import { cookies } from "next/headers"
 
 const API_BASE_URL =
-    process.env.REPORTS_API_URL?.replace(
-        /\/$/,
-        ""
-    )
+    process.env.REPORTS_API_URL?.replace(/\/$/, "")
 
 export async function GET() {
     try {
@@ -14,25 +13,40 @@ export async function GET() {
                     message:
                         "REPORTS_API_URL não foi configurada.",
                 },
+                { status: 500 }
+            )
+        }
+
+        // Recuperar o cookie enviado pelo navegador.
+        const cookieStore = await cookies()
+
+        const accessToken = cookieStore.get(
+            "lpshub_access_token"
+        )
+
+        // Impedir requisições sem autenticação.
+        if (!accessToken?.value) {
+            return NextResponse.json(
                 {
-                    status: 500,
-                }
+                    message:
+                        "Não autenticado. Faça login para continuar.",
+                },
+                { status: 401 }
             )
         }
 
         const apiUrl =
             `${API_BASE_URL}/api/v1/filiais`
 
-        console.log(
-            "Encaminhando requisição para:",
-            apiUrl
-        )
-
         const response = await fetch(apiUrl, {
             method: "GET",
 
             headers: {
                 Accept: "application/json",
+
+                // Encaminhar o cookie ao backend.
+                Cookie:
+                    `lpshub_access_token=${accessToken.value}`,
             },
 
             cache: "no-store",
@@ -56,11 +70,6 @@ export async function GET() {
                 {
                     status: response.status,
                     contentType,
-                    preview:
-                        responseText.slice(
-                            0,
-                            500
-                        ),
                 }
             )
 
@@ -72,9 +81,7 @@ export async function GET() {
                     upstreamStatus:
                         response.status,
                 },
-                {
-                    status: 502,
-                }
+                { status: 502 }
             )
         }
 
@@ -89,26 +96,23 @@ export async function GET() {
                     message:
                         "A API de filiais retornou um JSON inválido.",
                 },
-                {
-                    status: 502,
-                }
+                { status: 502 }
             )
         }
 
+        // Repassar erros de autenticação,
+        // autorização e demais erros do backend.
         if (!response.ok) {
             console.error(
                 "A API de filiais retornou um erro:",
                 {
                     status: response.status,
-                    responseData,
                 }
             )
 
             return NextResponse.json(
                 responseData,
-                {
-                    status: response.status,
-                }
+                { status: response.status }
             )
         }
 
@@ -128,9 +132,7 @@ export async function GET() {
                     message:
                         "A API de filiais não retornou um array válido.",
                 },
-                {
-                    status: 502,
-                }
+                { status: 502 }
             )
         }
 
@@ -141,13 +143,10 @@ export async function GET() {
                 branch?.Sigla ?? ""
             )
                 .trim()
-                .toLocaleUpperCase(
-                    "pt-BR"
-                )
+                .toLocaleUpperCase("pt-BR")
 
             const nomeEmpresa = String(
-                branch?.["Nome Empresa"] ??
-                ""
+                branch?.["Nome Empresa"] ?? ""
             ).trim()
 
             if (
@@ -167,10 +166,7 @@ export async function GET() {
         const branches = [
             ...branchMap.values(),
         ].sort(
-            (
-                firstBranch,
-                secondBranch
-            ) =>
+            (firstBranch, secondBranch) =>
                 firstBranch.sigla.localeCompare(
                     secondBranch.sigla,
                     "pt-BR"
@@ -181,8 +177,12 @@ export async function GET() {
             branches,
             {
                 status: 200,
+                headers: {
+                    "Cache-Control": "no-store",
+                },
             }
         )
+
     } catch (error) {
         console.error(
             "Erro no Route Handler de filiais:",
@@ -194,9 +194,7 @@ export async function GET() {
                 message:
                     "Não foi possível acessar a API de filiais.",
             },
-            {
-                status: 500,
-            }
+            { status: 502 }
         )
     }
 }
