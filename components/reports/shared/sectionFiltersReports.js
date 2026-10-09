@@ -402,7 +402,7 @@ export default function SectionFiltersReports({ onDataChange, onLoadingChange, }
                     <button type="button" onClick={clearFilters} className="toolbar-button">{Icon("restart_alt", "text-[16px]")} Limpar Filtros</button>
                     <button type="button" onClick={executeReport} disabled={executing} className="toolbar-button primary">
                         {Icon(executing ? "refresh" : "play_arrow", `text-[18px] ${executing ? "animate-spin" : ""}`)}
-                        {executing ? "Executando RFC..." : "Executar Relatório (F8)"}
+                        {executing ? "Executando Relatorio..." : "Executar Relatório"}
                     </button>
                 </div>
             </div>
