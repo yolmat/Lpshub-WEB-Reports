@@ -8,7 +8,7 @@ import { useTheme } from "next-themes";
 import logoNegative from "@/public/logoNegative.png";
 import logoPositive from "@/public/logoPositive.png";
 
-export default function Logo() {
+export default function Logo({ className }) {
     const { theme } = useTheme();
 
     const dark = theme === "dark";
@@ -16,7 +16,7 @@ export default function Logo() {
     return (
         <Image
             alt="Lopes Logo"
-            className="h-8 w-auto object-contain"
+            className={`h-8 w-auto object-contain ${className}`}
             src={dark ? logoNegative : logoPositive}
         />
     );
