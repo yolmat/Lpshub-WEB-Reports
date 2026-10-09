@@ -22,7 +22,7 @@ export default function ReportsHeader() {
 
                 </div>
 
-                <Search />
+                {/*}<Search />{*/}
 
                 <div className="flex items-center gap-space-sm shrink-0 justify-center">
 
