@@ -2,8 +2,9 @@
 import CardPerson from "@/components/cardPerson";
 import Logo from "@/components/logo";
 import Search from "@/components/search";
-import StatusPerson from "@/components/statusServer";
+import StatusApi from "@/components/StatusApi";
 import ThemeToggle from "@/components/ThemeToggle";
+import Link from "next/link";
 
 export default function ReportsHeader() {
     return (
@@ -11,14 +12,28 @@ export default function ReportsHeader() {
             <div className="h-14 w-full px-space-xl flex items-center justify-between gap-space-lg">
                 <div className="flex items-center gap-space-md shrink-0">
 
-                    <Logo />
+                    <Link href="/dashboard">
+                        <Logo />
+                    </Link>
 
                     <div className="hidden sm:flex flex-col">
                         <span className="font-headline-sm leading-none">LpsHub - Reports</span>
                         <span className="font-caption text-on-surface-variant leading-none">Relatórios SAP</span>
                     </div>
 
-                    <StatusPerson />
+                    <div className="flex items-center gap-2">
+                        <StatusApi
+                            name="Servidor API"
+                            endpoint="/api/status/api"
+                            refreshInterval={60000}
+                        />
+
+                        <StatusApi
+                            name="Servidor SAP"
+                            endpoint="/api/status/sap"
+                            refreshInterval={60000}
+                        />
+                    </div>
 
                 </div>
 
